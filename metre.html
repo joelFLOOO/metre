@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Métré</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    max-width: 420px;
+    margin: 30px auto;
+    padding: 0 16px;
+  }
+  h1 { font-size: 24px; }
+  .champ {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+  }
+  .champ input { width: 100px; padding: 5px; }
+  #resultat {
+    background: white;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 6px;
+    border-left: 5px solid #e67e22;
+    line-height: 1.8;
+  }
+  button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: #e67e22;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+#liste { list-style: none; padding: 0; }
+#liste li {
+  background: white;
+  padding: 10px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+}
+#total { font-weight: bold; line-height: 1.8; }
+</style>
+</head>
+<body>
+  <h1>Calculateur de métré</h1>
+  <div class="champ">
+  <label for="nom">Nom de la pièce</label>
+  <input id="nom" type="text">
+</div>
+  <div class="champ">
+    <label for="longueur">Longueur (m)</label>
+    <input id="longueur" type="number" oninput="calculer()">
+  </div>
+  <div class="champ">
+    <label for="largeur">Largeur (m)</label>
+    <input id="largeur" type="number" oninput="calculer()">
+  </div>
+  <div class="champ">
+    <label for="hauteur">Hauteur sous plafond (m)</label>
+    <input id="hauteur" type="number" value="2.8" oninput="calculer()">
+  </div>
+
+  <div id="resultat">Entrez les dimensions de la pièce.</div>
+
+  <button onclick="ajouter()">Ajouter la pièce</button>
+
+  <h2>Pièces</h2>
+  <ul id="liste"></ul>
+  <div id="total"></div>
+
+  <script>
+    function surfaceSol(longueur, largeur) {
+        return longueur*largeur;
+    }
+
+    function perimetre(longueur, largeur) {
+     return (longueur + largeur) * 2;
+    }
+
+    function surfaceMurs(longueur, largeur, hauteur) {
+     let p = perimetre(longueur,largeur);
+     return p * hauteur;
+    }
+
+    function calculer() {
+     let longueur = Number(document.getElementById("longueur").value);
+     let largeur  = Number(document.getElementById("largeur").value);
+     let hauteur  = Number(document.getElementById("hauteur").value);
+     let sol  = surfaceSol(longueur,largeur );
+     let murs = surfaceMurs(longueur, largeur, hauteur);
+     let litres = peinture(murs);
+
+    document.getElementById("resultat").innerHTML =
+      "Sol : " + sol.toFixed(2) + " m²<br>" +
+      "Murs : " + murs.toFixed(2) + " m²<br>" +
+      "Peinture : " + litres.toFixed(2) + " litres";
+     }
+    function peinture(surface){
+        return surface*2 / 10
+    }
+    let pieces = [];
+
+    function ajouter() {
+     let nom      = document.getElementById("nom").value;
+     let longueur = Number(document.getElementById("longueur").value);
+     let largeur  = Number(document.getElementById("largeur").value);
+     let hauteur  = Number(document.getElementById("hauteur").value);
+     if (nom === "" || longueur <= 0 || largeur <= 0) {
+       document.getElementById("resultat").innerHTML =
+         "Remplis le nom, la longueur et la largeur.";
+        return;
+}
+     let sol    = surfaceSol(longueur, largeur);
+     let murs   = surfaceMurs(longueur, largeur, hauteur);
+     let litres = peinture(murs);
+
+     pieces.push({ nom: nom, sol: sol, murs: murs, litres: litres });
+     afficher();
+}
+
+    function afficher() {
+      let texte = "";
+      let totalSol = 0;
+      let totalMurs = 0;
+      let totalLitres = 0;
+
+      for (let piece of pieces) {
+        texte += "<li>" + piece.nom + " : sol " + piece.sol.toFixed(2) +
+             " m², murs " + piece.murs.toFixed(2) + " m², peinture " +
+             piece.litres.toFixed(2) + " L</li>";
+        totalSol    += piece.sol;
+        totalMurs   += piece.murs;
+        totalLitres += piece.litres;
+  }
+
+    document.getElementById("liste").innerHTML = texte;
+    document.getElementById("total").innerHTML =
+        "Total sol : " + totalSol.toFixed(2) + " m²<br>" +
+        "Total murs : " + totalMurs.toFixed(2) + " m²<br>" +
+        "Total peinture : " + totalLitres.toFixed(2) + " L";
+}
+  </script>
+</body>
+</html>
